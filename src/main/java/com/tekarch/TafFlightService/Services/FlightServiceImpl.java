@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -67,8 +70,23 @@ public class FlightServiceImpl implements FlightService {
     }
 
     // Delete a flight by ID
-    public void deleteFlight(Long flight_id) {
+    /*public void deleteFlight(Long flight_id) {
         String url = dataStoreMsUrl + "/flights/" + flight_id;
         restTemplate.delete(url);
+    }*/
+
+    public ResponseEntity<String> deleteFlight(Long flight_id) {
+        logger.info("Delete flight by ID:: " + flight_id);
+        String url = dataStoreMsUrl + "/flights/" + flight_id;
+
+        try {
+            restTemplate.delete(url);
+            return ResponseEntity.ok("Flight with ID " + flight_id + " was successfully deleted.");
+        } catch (HttpClientErrorException e) {
+            logger.error("Error deleting flight with ID " + flight_id, e);
+            return ResponseEntity.status(e.getStatusCode())
+                    .body("Failed to delete Flight with ID " + flight_id + ": " + e.getMessage());
+        }
+
     }
 }
